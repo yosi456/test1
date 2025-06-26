@@ -1,0 +1,32 @@
+# docker-compose.yml
+
+version: '3.8'
+
+services:
+  # 1. Webアプリケーションのサービス
+  app:
+    build: .  # 同じ階層のDockerfileを使ってコンテナをビルド
+    ports:
+      - "3000:3000" # PCの3000番ポートをコンテナの3000番ポートに繋ぐ
+    volumes:
+      - ./app:/usr/src/app # PCのappフォルダをコンテナの作業場所に同期する
+    environment:
+      - DB_HOST=db
+      - DB_USER=user
+      - DB_PASSWORD=password
+      - DB_NAME=myapp
+    depends_on:
+      - db # dbサービスが起動してからappサービスを起動する
+
+  # 2. データベースのサービス
+  db:
+    image: postgres:14-alpine # Docker Hubの公式PostgreSQLイメージを使用
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=myapp
+    volumes:
+      - db-data:/var/lib/postgresql/data # DBのデータをPCに保存して消えないようにする
+
+volumes:
+  db-data: # 上記で使うデータ保存領域を定義
